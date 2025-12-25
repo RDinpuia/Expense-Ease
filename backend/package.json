@@ -12,20 +12,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-<<<<<<< HEAD
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1"
-=======
-    "axios": "^1.6.0",
-    "cors": "^2.8.5",
-    "express": "^5.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^5.0.0"
->>>>>>> 52a858dbf988762f2e6c55aa5e07dd4c0cfda14e
   }
 }
