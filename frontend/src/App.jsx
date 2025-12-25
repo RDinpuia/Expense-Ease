@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [expenses, setExpenses] = useState([]);
+  const [total, setTotal] = useState(0);
   const safeExpenses = Array.isArray(expenses) ? expenses : [];
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -13,8 +14,16 @@ function App() {
 
   // Fetch expenses from backend
   useEffect(() => {
-    axios.get(`${API_URL}/api/expenses`)
+    // Fetch all expenses
+    axios
+      .get(`${API_URL}/api/expenses`)
       .then((res) => setExpenses(res.data))
+      .catch((err) => console.error(err));
+
+    // Fetch total expense
+    axios
+      .get(`${API_URL}/api/expenses/total`)
+      .then((res) => setTotal(res.data.total))
       .catch((err) => console.error(err));
   }, []);
 
@@ -27,29 +36,24 @@ function App() {
       date,
     };
 
-  try {
-    const res = await axios.post(
-      `${API_URL}/api/expenses`,
-      newExpense
-    );
+    try {
+      const res = await axios.post(`${API_URL}/api/expenses`, newExpense);
 
-    setExpenses((prev) =>
-      Array.isArray(prev) ? [...prev, res.data] : [res.data]
-    );
-  } catch (error) {
-    console.error(error);
-  }
+      setExpenses((prev) =>
+        Array.isArray(prev) ? [...prev, res.data] : [res.data]
+      );
 
-  setTitle("");
-  setAmount("");
-  setDate("");
-};
+      // Refresh total after adding expense
+      const totalRes = await axios.get(`${API_URL}/api/expenses/total`);
+      setTotal(totalRes.data.total);
+    } catch (error) {
+      console.error(error);
+    }
 
-  const totalExpense = safeExpenses.reduce(
-  (sum, exp) => sum + Number(exp.amount),
-  0
-);
-  
+    setTitle("");
+    setAmount("");
+    setDate("");
+  };
 
   return (
     <div className="app">
@@ -80,15 +84,15 @@ function App() {
       </form>
 
       <h3>All Expenses</h3>
-{safeExpenses.length === 0 && <p>No expenses added yet.</p>}
+      {safeExpenses.length === 0 && <p>No expenses added yet.</p>}
 
-{safeExpenses.map((exp, index) => (
-  <div key={index} style={{ marginBottom: "8px" }}>
-    <strong>{exp.title}</strong> | ₹{exp.amount} | {exp.date}
-  </div>
-))}
+      {safeExpenses.map((exp, index) => (
+        <div key={index} style={{ marginBottom: "8px" }}>
+          <strong>{exp.title}</strong> | ₹{exp.amount} | {exp.date}
+        </div>
+      ))}
 
-      <h2>Total: ₹{totalExpense}</h2>
+      <h2>Total: ₹{total}</h2>
     </div>
   );
 }
