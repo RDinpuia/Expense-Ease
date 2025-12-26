@@ -122,10 +122,10 @@ function App() {
       {safeExpenses.length === 0 && <p>No expenses added yet.</p>}
 
       {safeExpenses.map((exp) => (
-        <div key={exp.id} style={{ marginBottom: "8px" }}>
-          <strong>{exp.title}</strong> | ₹{exp.amount} | {exp.date}{" "}
-          <button onClick={() => handleEdit(exp)}>Edit</button>{" "}
-          <button onClick={() => handleDelete(exp.id)}>Delete</button>
+        <div key={exp._id} style={{ marginBottom: "8px" }}>
+          <strong>{exp.title}</strong> | ₹{exp.amount} | {exp.date}
+          <button onClick={() => handleEdit(exp)}>Edit</button>
+          <button onClick={() => handleDelete(exp._id)}>Delete</button>
         </div>
       ))}
 
