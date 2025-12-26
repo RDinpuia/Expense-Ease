@@ -6,29 +6,37 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [expenses, setExpenses] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [editId, setEditId] = useState(null);
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
 
-  const [editId, setEditId] = useState(null);
-
   const safeExpenses = Array.isArray(expenses) ? expenses : [];
 
-  // Fetch all expenses
+  // Fetch expenses + total on load
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/expenses`);
-        setExpenses(res.data);
-      } catch (err) {
-        console.error(err);
+        const expensesRes = await axios.get(
+          `${API_URL}/api/expenses`
+        );
+        setExpenses(expensesRes.data);
+
+        const totalRes = await axios.get(
+          `${API_URL}/api/expenses/total`
+        );
+        setTotal(totalRes.data.total);
+      } catch (error) {
+        console.error(error);
       }
     };
-    fetchExpenses();
+
+    fetchData();
   }, []);
 
-  // Add or Update expense
+  // ADD or UPDATE expense
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,8 +47,8 @@ function App() {
     };
 
     try {
-      if (editId !== null) {
-        // UPDATE existing expense
+      if (editId) {
+        // UPDATE expense
         const res = await axios.put(
           `${API_URL}/api/expenses/${editId}`,
           expenseData
@@ -48,12 +56,13 @@ function App() {
 
         setExpenses((prev) =>
           prev.map((exp) =>
-            exp.id === editId ? res.data : exp
+            exp._id === editId ? res.data : exp
           )
         );
+
         setEditId(null);
       } else {
-        // ADD new expense
+        // ADD expense
         const res = await axios.post(
           `${API_URL}/api/expenses`,
           expenseData
@@ -61,8 +70,14 @@ function App() {
 
         setExpenses((prev) => [...prev, res.data]);
       }
-    } catch (err) {
-      console.error(err);
+
+      // Refresh total
+      const totalRes = await axios.get(
+        `${API_URL}/api/expenses/total`
+      );
+      setTotal(totalRes.data.total);
+    } catch (error) {
+      console.error(error);
     }
 
     setTitle("");
@@ -70,33 +85,33 @@ function App() {
     setDate("");
   };
 
-  //  Delete expense
+  // Delete expense
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/api/expenses/${id}`);
-      setExpenses((prev) =>
-        prev.filter((exp) => exp.id !== id)
+      await axios.delete(
+        `${API_URL}/api/expenses/${id}`
       );
-    } catch (err) {
-      console.error(err);
+
+      setExpenses((prev) =>
+        prev.filter((expense) => expense._id !== id)
+      );
+
+      const totalRes = await axios.get(
+        `${API_URL}/api/expenses/total`
+      );
+      setTotal(totalRes.data.total);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  //  Edit expense (load into form)
+  // Load expense into form for editing
   const handleEdit = (expense) => {
-  console.log("Editing:", expense);
-  setEditId(expense.id);
-  setTitle(expense.title);
-  setAmount(expense.amount);
-  setDate(expense.date);
-};
-
-  // 🔢 Total recalculated from state
-  const totalExpense = safeExpenses.reduce(
-    (sum, exp) => sum + Number(exp.amount),
-    0
-  );
-  
+    setEditId(expense._id);
+    setTitle(expense.title);
+    setAmount(expense.amount);
+    setDate(expense.date);
+  };
 
   return (
     <div className="app">
@@ -110,6 +125,7 @@ function App() {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+
         <input
           type="number"
           placeholder="Amount"
@@ -117,29 +133,48 @@ function App() {
           onChange={(e) => setAmount(e.target.value)}
           required
         />
+
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
         />
+
         <button type="submit">
           {editId ? "Update Expense" : "Add Expense"}
         </button>
       </form>
 
       <h3>All Expenses</h3>
-      {safeExpenses.length === 0 && <p>No expenses added yet.</p>}
+
+      {safeExpenses.length === 0 && (
+        <p>No expenses added yet.</p>
+      )}
 
       {safeExpenses.map((exp) => (
-        <div key={exp.id} style={{ marginBottom: "8px" }}>
-          <strong>{exp.title}</strong> | ₹{exp.amount} | {exp.date}{" "}
-          <button onClick={() => handleEdit(exp)}>Edit</button>{" "}
-          <button onClick={() => handleDelete(exp.id)}>Delete</button>
+        <div
+          key={exp._id}
+          style={{ marginBottom: "8px" }}
+        >
+          <strong>{exp.title}</strong> | ₹{exp.amount} |{" "}
+          {exp.date}
+          <button
+            onClick={() => handleEdit(exp)}
+            style={{ marginLeft: "10px" }}
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(exp._id)}
+            style={{ marginLeft: "6px" }}
+          >
+            Delete
+          </button>
         </div>
       ))}
 
-      <h2>Total: ₹{totalExpense}</h2>
+      <h2>Total: ₹{total}</h2>
     </div>
   );
 }
