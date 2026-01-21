@@ -192,3 +192,36 @@ h2 {
   font-weight: 600;
   color: #38bdf8;
 }
+@media (max-width: 600px) {
+
+  /* App spacing */
+  .app {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  /* Form inputs stack vertically */
+  form {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  form input,
+  form button {
+    width: 100%;
+    height: 44px;
+  }
+
+  /* Expense list rows stack vertically */
+  .app > div > div {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 6px;
+  }
+
+  /* Buttons align nicely */
+  .app > div > div button {
+    width: 100%;
+    margin-top: 4px;
+  }
+}
