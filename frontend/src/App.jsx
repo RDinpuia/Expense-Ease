@@ -115,7 +115,7 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Simple Expense Tracker</h1>
+      <h1>Expense Ease</h1>
 
       <form onSubmit={handleSubmit}>
         <input
